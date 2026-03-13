@@ -15,7 +15,7 @@ class AgentSession
     
     # 假设使用 default 或 openai, 取决于 ruby_llm 配置 (可通过 ENV 或配置文件注入)
     # 此处假设用户环境变量已配置相应 profile，暂设为默认。
-    llm_profile = ENV['SPSS_AGENT_LLM_PROFILE'] || 'openai'
+    llm_profile = ENV['SPSS_AGENT_LLM_PROFILE'] || 'glm'
     
     @agent = Descartes::Agent::Base.new(
       name: :spss_expert,
@@ -64,7 +64,7 @@ class AgentSession
       CRITICAL INSTRUCTIONS:
       1. You must iteratively use the `execute_spss` tool to test your code on the local dataset.
       2. If the syntax contains errors, the tool will return the SPSS output error message. You must reflect on the error, fix your syntax, and run the tool again until execution succeeds and the output makes sense.
-      3. Once you have successfully achieved the user's goal, you should summarize the final syntax working solution and submit your work using the `send_message` tool to yield control back to the user.
+      3. Once you have successfully achieved the user's goal, you should summarize the final syntax working solution and submit your work using the `send_message` tool with `key: "final_syntax"` and `value: <your syntax>` to yield control back to the user.
     PROMPT
   end
 end
