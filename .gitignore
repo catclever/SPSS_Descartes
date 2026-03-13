@@ -1,0 +1,8 @@
+/.agent/
+/.spss_tmp/
+/tmp/
+/.bundle/
+/vendor/bundle/
+*.gem
+/.config/
+/.ruby-lsp/
