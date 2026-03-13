@@ -1,0 +1,10 @@
+openai:
+  format: 'openai'
+  model: 'gpt-4o'
+  api_key: "ENV['OPENAI_API_KEY']"
+
+deepseek-coder:
+  format: 'openai'
+  model: 'deepseek-coder'
+  base_url: 'https://api.deepseek.com/v1'
+  api_key: "ENV['DEEPSEEK_API_KEY']"
