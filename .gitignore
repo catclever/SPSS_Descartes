@@ -6,3 +6,5 @@
 *.gem
 /.config/
 /.ruby-lsp/
+llm.yml
+node_modules/
