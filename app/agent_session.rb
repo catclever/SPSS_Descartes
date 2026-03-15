@@ -34,9 +34,11 @@ class AgentSession
         result = @agent.execute(@context, prompt)
         
         # 当模型调用 `send_message` (yield_control) 退出循环后:
+        final_syntax = @context.get('final_syntax') || result.to_s
+        
         @ws.send({
           type: 'finished',
-          final_syntax: result.to_s
+          final_syntax: final_syntax
         }.to_json)
       rescue => e
         @ws.send({ type: 'error', message: "Agent Crash: #{e.message}" }.to_json)

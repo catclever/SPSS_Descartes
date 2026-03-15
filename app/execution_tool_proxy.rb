@@ -30,7 +30,7 @@ class ExecutionToolProxy < Descartes::Tool::Base
     if result['status'] == 'error'
       "Execution Error: #{result['output']}\n\nPlease reflect on the error, correct your syntax, and try calling `execute_spss` again."
     else
-      "Execution Success:\n#{result['output']}"
+      "Execution Success:\n#{result['output']}\n\nCRITICAL INSTRUCTION: You have achieved the objective. You MUST IMMEDIATELY use the `send_message` tool with `key: \"final_syntax\"` and your syntax as the value. Do not generate any more syntax."
     end
   end
 end
