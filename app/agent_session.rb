@@ -66,7 +66,7 @@ class AgentSession
       CRITICAL INSTRUCTIONS:
       1. You must iteratively use the `execute_spss` tool to test your code on the local dataset.
       2. If the syntax contains errors, the tool will return the SPSS output error message. You must reflect on the error, fix your syntax, and run the tool again until execution succeeds and the output makes sense.
-      3. Once you have successfully achieved the user's goal, you should summarize the final syntax working solution and submit your work using the `send_message` tool with `key: "final_syntax"` and `value: <your syntax>` to yield control back to the user.
+      3. Once you have successfully achieved the user's goal, you MUST submit your work using the `send_message` tool with `key: "final_syntax"`. The `value` parameter MUST contain ONLY the raw, executable IBM SPSS syntax code. Do NOT wrap the code in markdown blocks (e.g. ```spss). Do NOT include any natural language text, explanations, or summaries. Just the plain executable code.
     PROMPT
   end
 end

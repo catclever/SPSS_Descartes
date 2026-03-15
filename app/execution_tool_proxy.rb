@@ -30,7 +30,7 @@ class ExecutionToolProxy < Descartes::Tool::Base
     if result['status'] == 'error'
       "Execution Error: #{result['output']}\n\nPlease reflect on the error, correct your syntax, and try calling `execute_spss` again."
     else
-      "Execution Success:\n#{result['output']}\n\nCRITICAL INSTRUCTION: You have achieved the objective. You MUST IMMEDIATELY use the `send_message` tool with `key: \"final_syntax\"` and your syntax as the value. Do not generate any more syntax."
+      "Execution Success:\n#{result['output']}\n\nCRITICAL INSTRUCTION: You have achieved the objective. You MUST IMMEDIATELY use the `send_message` tool with `key: \"final_syntax\"`. The `value` MUST contain ONLY the pure, raw IBM SPSS syntax code without any markdown formatting (e.g. no ```spss) or natural language explanations."
     end
   end
 end
