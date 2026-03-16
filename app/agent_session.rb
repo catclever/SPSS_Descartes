@@ -38,17 +38,18 @@ class AgentSession
     llm_api_key = llm_conf['api_key']
 
     if llm_api_key && !llm_api_key.empty?
-      config_yaml = {
-        'client_profile' => {
-          'format' => llm_conf['format'] || 'openai',
-          'base_url' => llm_conf['base_url'],
-          'model' => llm_conf['model'],
-          'api_key' => llm_api_key,
-          'temperature' => llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95,
-          'max_tokens' => 8192,
-          'timeout' => 300
-        }
-      }.to_yaml
+      client_profile = {
+        'format' => llm_conf['format'] || 'openai',
+        'base_url' => llm_conf['base_url'],
+        'model' => llm_conf['model'],
+        'api_key' => llm_api_key,
+        'max_tokens' => 8192,
+        'timeout' => 300
+      }
+      
+      client_profile['temperature'] = llm_conf['temperature'].to_f if llm_conf['temperature']
+
+      config_yaml = { 'client_profile' => client_profile }.to_yaml
       
       File.write(File.join(File.dirname(__dir__), 'llm.yml'), config_yaml)
       llm_profile = 'client_profile'
