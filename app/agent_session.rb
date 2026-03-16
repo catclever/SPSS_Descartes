@@ -44,11 +44,7 @@ class AgentSession
           'base_url' => llm_conf['base_url'],
           'model' => llm_conf['model'],
           'api_key' => llm_api_key,
-          'temperature' => begin
-            t = llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95
-            m_name = llm_conf['model'].to_s.downcase
-            ( (m_name.include?('kimi') || m_name.include?('moonshot')) && t == 1.0 ) ? 1 : t
-          end,
+          'temperature' => llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95,
           'max_tokens' => 8192,
           'timeout' => 300
         }
