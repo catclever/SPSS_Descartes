@@ -34,12 +34,50 @@ class AgentSession
         result = @agent.execute(@context, prompt)
         
         # 当模型调用 `send_message` (yield_control) 退出循环后:
-        final_syntax = @context.get('final_syntax') || result.to_s
-        
-        @ws.send({
-          type: 'finished',
-          final_syntax: final_syntax
-        }.to_json)
+        # The agent.execute returns the final response which might contain the arguments directly
+        # If the agent yielded control via send_message, the result will be a ToolCallResult
+        if result.is_a?(RubyLlm::ToolCallResult) && result.tool_name == 'send_message'
+          # The arguments for send_message are typically an array of hashes, e.g., [{"key": "final_syntax", "value": "..."}]
+          # Or, if the LLM is smart, it might provide a single hash {final_syntax: "...", analysis_summary: "..."}
+          # We need to parse the arguments to extract the required keys.
+          
+          final_syntax = "No final syntax provided by agent."
+          analysis_summary = "No analysis summary provided by agent."
+
+          # Try to parse the arguments from the tool call result
+          if result.arguments.is_a?(Array)
+            result.arguments.each do |arg|
+              if arg.is_a?(Hash)
+                if arg['key'] == 'final_syntax'
+                  final_syntax = arg['value']
+                elsif arg['key'] == 'analysis_summary'
+                  analysis_summary = arg['value']
+                end
+              end
+            end
+          elsif result.arguments.is_a?(Hash) # Handle case where LLM provides a single hash
+            final_syntax = result.arguments['final_syntax'] if result.arguments.key?('final_syntax')
+            analysis_summary = result.arguments['analysis_summary'] if result.arguments.key?('analysis_summary')
+          end
+          
+          @ws.send({
+            type: 'finished',
+            status: 'success',
+            final_syntax: final_syntax,
+            analysis_summary: analysis_summary
+          }.to_json)
+        else
+          # Fallback if agent didn't use send_message or result is unexpected
+          final_syntax = @context.get('final_syntax') || result.to_s
+          analysis_summary = @context.get('analysis_summary') || "Agent finished without explicit summary."
+          
+          @ws.send({
+            type: 'finished',
+            status: 'success',
+            final_syntax: final_syntax,
+            analysis_summary: analysis_summary
+          }.to_json)
+        end
       rescue => e
         @ws.send({ type: 'error', message: "Agent Crash: #{e.message}" }.to_json)
       end
@@ -65,8 +103,11 @@ class AgentSession
       
       CRITICAL INSTRUCTIONS:
       1. You must iteratively use the `execute_spss` tool to test your code on the local dataset.
-      2. If the syntax contains errors, the tool will return the SPSS output error message. You must reflect on the error, fix your syntax, and run the tool again until execution succeeds and the output makes sense.
-      3. Once you have successfully achieved the user's goal, you MUST submit your work using the `send_message` tool with `key: "final_syntax"`. The `value` parameter MUST contain ONLY the raw, executable IBM SPSS syntax code. Do NOT wrap the code in markdown blocks (e.g. ```spss). Do NOT include any natural language text, explanations, or summaries. Just the plain executable code.
+      2. If the syntax contains errors, the tool will return the SPSS output error message. You must reflect on the error, fix your syntax, and run the tool again.
+      3. Once execution succeeds and the objective is met, you MUST use the `send_message` tool.
+      4. Your `send_message` tool payload MUST include TWO key-value pairs (or you must call it twice if limited to one key):
+         - `key: "final_syntax"` -> The `value` MUST contain ONLY the pure, raw, complete executable IBM SPSS syntax code (no markdown wrappers like ```spss, no explanations, just the code).
+         - `key: "analysis_summary"` -> The `value` MUST contain a natural language analytical report summarizing the statistical findings you observed from the SPSS execution output.
     PROMPT
   end
 end
