@@ -1,5 +1,6 @@
 require 'descartes'
 require_relative 'execution_tool_proxy'
+require 'yaml'
 
 class SubmitResultsToolProxy < Descartes::Tool::Base
   name :submit_results
@@ -33,9 +34,27 @@ class AgentSession
       dataset_schema: @init_data['schema']
     })
     
-    # 假设使用 default 或 openai, 取决于 ruby_llm 配置 (可通过 ENV 或配置文件注入)
-    # 此处假设用户环境变量已配置相应 profile，暂设为默认。
-    llm_profile = ENV['SPSS_AGENT_LLM_PROFILE'] || 'glm'
+    llm_conf = @init_data['llm_config'] || {}
+    llm_api_key = llm_conf['api_key']
+
+    if llm_api_key && !llm_api_key.empty?
+      config_yaml = {
+        'client_profile' => {
+          'format' => llm_conf['format'] || 'openai',
+          'base_url' => llm_conf['base_url'],
+          'model' => llm_conf['model'],
+          'api_key' => llm_api_key,
+          'temperature' => 0.95,
+          'max_tokens' => 8192,
+          'timeout' => 300
+        }
+      }.to_yaml
+      
+      File.write(File.join(File.dirname(__dir__), 'llm.yml'), config_yaml)
+      llm_profile = 'client_profile'
+    else
+      llm_profile = ENV['SPSS_AGENT_LLM_PROFILE'] || 'glm'
+    end
     
     @agent = Descartes::Agent::Base.new(
       name: :spss_expert,
