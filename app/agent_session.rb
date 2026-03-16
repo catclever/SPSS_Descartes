@@ -1,6 +1,26 @@
 require 'descartes'
 require_relative 'execution_tool_proxy'
 
+class SubmitResultsToolProxy < Descartes::Tool::Base
+  name :submit_results
+  description "Submit the final SPSS syntax and analytical summary to complete the job."
+  yields_control true
+  parameters(
+    type: "object",
+    properties: {
+      final_syntax: { type: "string", description: "The pure executable IBM SPSS syntax code." },
+      analysis_summary: { type: "string", description: "The natural language analytical report." }
+    },
+    required: ["final_syntax", "analysis_summary"]
+  )
+
+  def execute(args)
+    @context.set('final_syntax', args['final_syntax'])
+    @context.set('analysis_summary', args['analysis_summary'])
+    "Mission Accomplished."
+  end
+end
+
 class AgentSession
   def initialize(ws, init_data)
     @ws = ws
@@ -21,7 +41,7 @@ class AgentSession
       name: :spss_expert,
       profile_name: llm_profile,
       system_prompt: build_system_prompt,
-      tools: [ExecutionToolProxy]
+      tools: [ExecutionToolProxy, SubmitResultsToolProxy]
     )
   end
 
@@ -33,53 +53,18 @@ class AgentSession
         # 阻塞调用 Descartes Agent 的内部 ReAct 循环
         result = @agent.execute(@context, prompt)
         
-        # 当模型调用 `send_message` (yield_control) 退出循环后:
-        # The agent.execute returns the final response which might contain the arguments directly
-        # If the agent yielded control via send_message, the result will be a ToolCallResult
-        if result.is_a?(Descartes::ToolCallResult) && result.tool_name == 'send_message'
-          # The arguments for send_message are typically an array of hashes, e.g., [{"key": "final_syntax", "value": "..."}]
-          # Or, if the LLM is smart, it might provide a single hash {final_syntax: "...", analysis_summary: "..."}
-          # We need to parse the arguments to extract the required keys.
-          
-          final_syntax = "No final syntax provided by agent."
-          analysis_summary = "No analysis summary provided by agent."
-
-          # Try to parse the arguments from the tool call result
-          if result.arguments.is_a?(Array)
-            result.arguments.each do |arg|
-              if arg.is_a?(Hash)
-                if arg['key'] == 'final_syntax'
-                  final_syntax = arg['value']
-                elsif arg['key'] == 'analysis_summary'
-                  analysis_summary = arg['value']
-                end
-              end
-            end
-          elsif result.arguments.is_a?(Hash) # Handle case where LLM provides a single hash
-            final_syntax = result.arguments['final_syntax'] if result.arguments.key?('final_syntax')
-            analysis_summary = result.arguments['analysis_summary'] if result.arguments.key?('analysis_summary')
-          end
-          
-          @ws.send({
-            type: 'finished',
-            status: 'success',
-            final_syntax: final_syntax,
-            analysis_summary: analysis_summary
-          }.to_json)
-        else
-          # Fallback if agent didn't use send_message or result is unexpected
-          final_syntax = @context.get('final_syntax') || result.to_s
-          analysis_summary = @context.get('analysis_summary') || "Agent finished without explicit summary."
-          
-          @ws.send({
-            type: 'finished',
-            status: 'success',
-            final_syntax: final_syntax,
-            analysis_summary: analysis_summary
-          }.to_json)
-        end
+        # 因为 submit_results 工具会自动把内容写入 @context，我们直接从 context 中取结果
+        final_syntax = @context.get('final_syntax') || "No syntax generated. (Agent Result: #{result})"
+        analysis_summary = @context.get('analysis_summary') || "No analysis generated. (Agent Result: #{result})"
+        
+        @ws.send({
+          type: 'finished',
+          status: 'success',
+          final_syntax: final_syntax,
+          analysis_summary: analysis_summary
+        }.to_json)
       rescue => e
-        @ws.send({ type: 'error', message: "Agent Crash: #{e.message}" }.to_json)
+        @ws.send({ type: 'error', message: "Agent Crash: #{e.message}\n#{e.backtrace.first(3).join("\n")}" }.to_json)
       end
     end
   end
@@ -98,16 +83,19 @@ class AgentSession
       
       You have access to a remote execution tool `execute_spss` that allows you to run SPSS code on the user's computer against their secure dataset.
       
-      Here is the User's Dataset Schema (Metadata):
-      #{@init_data['schema']}
+      Here is the pre-fetched Data Dictionary / Metadata for the active dataset:
+      ---
+      #{@init_data['working_note']}
+      ---
       
       CRITICAL INSTRUCTIONS:
+      0. DO NOT invoke `DISPLAY DICTIONARY.` or `SHOW VARIABLES.`. The dataset metadata is already provided to you above. Analyze it directly.
       1. You must iteratively use the `execute_spss` tool to test your code on the local dataset.
       2. If the syntax contains errors, the tool will return the SPSS output error message. You must reflect on the error, fix your syntax, and run the tool again.
-      3. Once execution succeeds and the objective is met, you MUST use the `send_message` tool.
-      4. Your `send_message` tool payload MUST include TWO key-value pairs (or you must call it twice if limited to one key):
-         - `key: "final_syntax"` -> The `value` MUST contain ONLY the pure, raw, complete executable IBM SPSS syntax code (no markdown wrappers like ```spss, no explanations, just the code).
-         - `key: "analysis_summary"` -> The `value` MUST contain a natural language analytical report summarizing the statistical findings you observed from the SPSS execution output.
+      3. Once execution succeeds and the objective is met, you MUST use the `submit_results` tool to finish the job.
+      4. Your `submit_results` tool payload MUST include BOTH properties:
+         - `final_syntax`: MUST contain ONLY the pure, raw, complete executable IBM SPSS syntax code (no markdown wrappers like ```spss, no explanations, just the code).
+         - `analysis_summary`: MUST contain a natural language analytical report summarizing the statistical findings you observed from the SPSS execution output.
     PROMPT
   end
 end
