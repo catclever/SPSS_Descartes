@@ -44,7 +44,10 @@ class AgentSession
           'base_url' => llm_conf['base_url'],
           'model' => llm_conf['model'],
           'api_key' => llm_api_key,
-          'temperature' => llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95,
+          'temperature' => begin
+            t = llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95
+            t == 1.0 ? 1 : t
+          end,
           'max_tokens' => 8192,
           'timeout' => 300
         }
