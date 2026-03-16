@@ -1,11 +1,13 @@
-PATH
-  remote: /Users/kael/workbench/ruby_lab/descartes
+GIT
+  remote: https://github.com/catclever/descartes.git
+  revision: 578dc7fec24d86c5941dfdcf577c372dc770802b
   specs:
     descartes (0.1.0)
       ruby_llm
 
-PATH
-  remote: /Users/kael/workbench/ruby_lab/ruby_llm
+GIT
+  remote: https://github.com/catclever/ruby_llm.git
+  revision: b900ea9013206d7eec143fa713141892469735e3
   specs:
     ruby_llm (0.1.0)
       dotenv (~> 3.1)
