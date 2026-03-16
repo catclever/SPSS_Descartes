@@ -36,7 +36,7 @@ class AgentSession
         # 当模型调用 `send_message` (yield_control) 退出循环后:
         # The agent.execute returns the final response which might contain the arguments directly
         # If the agent yielded control via send_message, the result will be a ToolCallResult
-        if result.is_a?(RubyLlm::ToolCallResult) && result.tool_name == 'send_message'
+        if result.is_a?(Descartes::ToolCallResult) && result.tool_name == 'send_message'
           # The arguments for send_message are typically an array of hashes, e.g., [{"key": "final_syntax", "value": "..."}]
           # Or, if the LLM is smart, it might provide a single hash {final_syntax: "...", analysis_summary: "..."}
           # We need to parse the arguments to extract the required keys.
