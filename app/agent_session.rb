@@ -46,7 +46,7 @@ class AgentSession
           'api_key' => llm_api_key,
           'temperature' => begin
             t = llm_conf['temperature'] ? llm_conf['temperature'].to_f : 0.95
-            t == 1.0 ? 1 : t
+            (llm_conf['model'].to_s.include?('kimi-2.5') && t == 1.0) ? 1 : t
           end,
           'max_tokens' => 8192,
           'timeout' => 300
