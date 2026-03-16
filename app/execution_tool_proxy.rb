@@ -27,6 +27,11 @@ class ExecutionToolProxy < Descartes::Tool::Base
     result = queue.pop
 
     # 3. 将结果原样或者封装后返回给大模型
+    ws.send({
+      type: 'thinking',
+      message: 'Calling Model...'
+    }.to_json)
+
     if result['status'] == 'error'
       "Execution Error: #{result['output']}\n\nPlease reflect on the error, correct your syntax, and try calling `execute_spss` again."
     else
