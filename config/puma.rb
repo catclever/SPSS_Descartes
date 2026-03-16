@@ -1,0 +1,14 @@
+# Puma can serve each request in a thread from an internal thread pool.
+threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }
+threads threads_count, threads_count
+
+# Specifies the `port` that Puma will listen on to receive requests; default is 9292.
+# Railway provides the PORT environment variable. We MUST bind to 0.0.0.0 (all interfaces)
+# to allow Railway's external router to forward requests into the Docker container.
+port        ENV.fetch("PORT") { 9292 }, "0.0.0.0"
+
+# Specifies the `environment` that Puma will run in.
+environment ENV.fetch("RAILS_ENV") { "development" }
+
+# Allow puma to be restarted by `bin/rails restart` command.
+plugin :tmp_restart

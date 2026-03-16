@@ -29,4 +29,4 @@ COPY . .
 EXPOSE 9292
 
 # Start server
-CMD ["bundle", "exec", "puma", "-t", "5:5"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
