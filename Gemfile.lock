@@ -7,7 +7,7 @@ GIT
 
 GIT
   remote: https://github.com/catclever/ruby_llm.git
-  revision: dcf772fc72cc22dc328b492c2b4a1211abd60c0d
+  revision: 668735e2a4cae162cd0e2da77798bdc0bddf8a8b
   specs:
     ruby_llm (0.1.0)
       dotenv (~> 3.1)
