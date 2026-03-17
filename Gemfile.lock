@@ -1,13 +1,13 @@
 GIT
   remote: https://github.com/catclever/descartes.git
-  revision: a9b67f0c6fa2cca9a58d07fc671cfbe1c87497a0
+  revision: fd4c966cc8316dc1438752628061ef1ad657f885
   specs:
     descartes (0.1.0)
       ruby_llm
 
 GIT
   remote: https://github.com/catclever/ruby_llm.git
-  revision: 668735e2a4cae162cd0e2da77798bdc0bddf8a8b
+  revision: aae5e07b1add58800e007bd274e65abfaa13c77a
   specs:
     ruby_llm (0.1.0)
       dotenv (~> 3.1)
