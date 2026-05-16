@@ -116,6 +116,7 @@ class AgentSession
       4. Your `submit_results` tool payload MUST include BOTH properties:
          - `final_syntax`: MUST contain ONLY the pure, raw, complete executable IBM SPSS syntax code (no markdown wrappers like ```spss, no explanations, just the code).
          - `analysis_summary`: MUST contain a natural language analytical report summarizing the statistical findings you observed from the SPSS execution output.
+      5. STRICT CONSTRAINT: You MUST ONLY perform the exact task requested by the user. Do NOT hallucinate, infer, or execute any additional data exploration, transformations, charting, or analyses that were not explicitly mentioned in the prompt. Do not overachieve.
     PROMPT
   end
 end
