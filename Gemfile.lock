@@ -1,13 +1,20 @@
 GIT
   remote: https://github.com/catclever/descartes.git
-  revision: fd4c966cc8316dc1438752628061ef1ad657f885
+  revision: 27dc8810663557e961ac4cb006c7456b6bacd105
   specs:
     descartes (0.1.0)
+      llm_json
       ruby_llm
 
 GIT
+  remote: https://github.com/catclever/llm_json.git
+  revision: 8ca3c0ee1b952ea369080125bdc7808916a83d96
+  specs:
+    llm_json (0.1.0)
+
+GIT
   remote: https://github.com/catclever/ruby_llm.git
-  revision: aae5e07b1add58800e007bd274e65abfaa13c77a
+  revision: dad2020e7e0ad67f8084755bdf7a16f1c9d4404a
   specs:
     ruby_llm (0.1.0)
       dotenv (~> 3.1)
@@ -39,6 +46,7 @@ PLATFORMS
 DEPENDENCIES
   descartes!
   faye-websocket
+  llm_json!
   puma
   rack
   ruby_llm!
@@ -49,6 +57,7 @@ CHECKSUMS
   dotenv (3.2.0) sha256=e375b83121ea7ca4ce20f214740076129ab8514cd81378161f11c03853fe619d
   eventmachine (1.2.7) sha256=994016e42aa041477ba9cff45cbe50de2047f25dd418eba003e84f0d16560972
   faye-websocket (0.12.0) sha256=ad9f7dfcd0306d0a13baeee450729657661129af15bb5f38716c242484ab42e1
+  llm_json (0.1.0)
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
   puma (7.2.0) sha256=bf8ef4ab514a4e6d4554cb4326b2004eba5036ae05cf765cfe51aba9706a72a8
   rack (3.2.5) sha256=4cbd0974c0b79f7a139b4812004a62e4c60b145cba76422e288ee670601ed6d3
